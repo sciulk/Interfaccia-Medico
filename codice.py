@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import base64
 import random
+import requests
+
 
 st.set_page_config(layout="wide")
 
