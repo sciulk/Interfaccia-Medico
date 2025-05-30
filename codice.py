@@ -47,15 +47,31 @@ def registra_scelta(lettera, immagine_corrente):
     if lettera == "A":
         scelta_tipo = "originale" if st.session_state.ordine_random else "modificata"
     else:
-        scelta_tipo = "modficata" if st.session_state.ordine_random else "originale"
+        scelta_tipo = "modificata" if st.session_state.ordine_random else "originale"
 
-    nuova_riga = pd.DataFrame([[immagine_corrente, lettera, scelta_tipo]],
-                              columns=["immagine", "scelta", "tipo_immagine"])
-    df_scelte_local = pd.concat([df_scelte, nuova_riga], ignore_index=True)
-    df_scelte_local.to_csv(scelte_file, index=False)
+    dati = {
+        "immagine": immagine_corrente,
+        "scelta": lettera,
+        "tipo_immagine": scelta_tipo
+    }
+
+    try:
+        response = requests.post(
+            "https://script.google.com/macros/s/AKfycbwFHdnOqhte_O5nbjX3lJZObeOK2cc0pQRq10QtYTvUueQegksbZXtZQAgJnNgUx9zQCg/exec",
+            json=dati,
+            timeout=5
+        )
+        if response.status_code == 200:
+            st.success("✅ Scelta salvata!")
+        else:
+            st.warning("⚠️ Errore nel salvataggio remoto.")
+    except Exception as e:
+        st.warning(f"⚠️ Connessione fallita: {e}")
+
     st.session_state.indice += 1
     st.session_state.ordine_random = random.choice([True, False])
     st.rerun()
+
 
 # Mostra immagine corrente
 if st.session_state.indice < len(st.session_state.immagini_da_valutare):
